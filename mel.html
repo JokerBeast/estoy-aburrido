@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wujeusioasudoaksjas</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* Estrellas de fondo */
+        .stars-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite ease-in-out;
+        }
+        
+        .star.small { width: 1px; height: 1px; }
+        .star.medium { width: 2px; height: 2px; }
+        .star.large { width: 3px; height: 3px; }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        /* Posiciones de estrellas */
+        .star:nth-child(1) { top: 15%; left: 20%; animation-delay: 0s; }
+        .star:nth-child(2) { top: 25%; left: 70%; animation-delay: 0.5s; }
+        .star:nth-child(3) { top: 35%; left: 30%; animation-delay: 1s; }
+        .star:nth-child(4) { top: 45%; left: 80%; animation-delay: 1.5s; }
+        .star:nth-child(5) { top: 55%; left: 10%; animation-delay: 2s; }
+        
+        /* Contenido principal */
+        .main-content {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: background-color 0.1s ease;
+        }
+        
+        /* Botón usando imagen PNG */
+        .alarm-button {
+            width: 200px; height: 200px;
+            border: none; background: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-image: url('boton-rojo.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+        }
+        
+        .alarm-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.5)) brightness(1.1);
+        }
+        
+        .alarm-button:active {
+            transform: translateY(2px) scale(0.98);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) brightness(0.9);
+        }
+        
+        .alarm-button.active {
+            animation: button-pulse 0.2s infinite alternate;
+        }
+        
+        @keyframes button-pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 8px 16px rgba(255, 0, 0, 0.4)) brightness(1); }
+            100% { transform: scale(1.02); filter: drop-shadow(0 12px 20px rgba(255, 0, 0, 0.6)) brightness(1.2); }
+        }
+        
+        /* Efectos de alarma */
+        .alarm-active {
+            animation: alarm-flash 0.15s infinite alternate, screen-shake 0.1s infinite;
+        }
+        
+        @keyframes alarm-flash {
+            0% { background-color: rgba(255, 0, 0, 0.2); }
+            100% { background-color: rgba(255, 0, 0, 0.7); }
+        }
+        
+        @keyframes screen-shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            25% { transform: translate(-1px, -2px) rotate(-1deg); }
+            50% { transform: translate(-3px, 0px) rotate(1deg); }
+            75% { transform: translate(3px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars-container">
+        <div class="stars">
+            <div class="star small"></div>
+            <div class="star small"></div>
+            <div class="star medium"></div>
+            <div class="star medium"></div>
+            <div class="star large"></div>
+        </div>
+    </div>
+    
+    <div class="main-content" id="mainContent">
+        <button class="alarm-button" id="alarmButton" onclick="activateAlarm()"></button>
+    </div>
+    
+    <script>
+        let alarmActive = false;
+        let alarmSound = null;
+        
+        function activateAlarm() {
+            const mainContent = document.getElementById('mainContent');
+            const button = document.getElementById('alarmButton');
+            
+            if (!alarmActive) {
+                alarmActive = true;
+                mainContent.classList.add('alarm-active');
+                createAlarmSound();
+                button.classList.add('active');
+            } else {
+                alarmActive = false;
+                mainContent.classList.remove('alarm-active');
+                if (alarmSound) {
+                    alarmSound.pause();
+                    alarmSound = null;
+                }
+                button.classList.remove('active');
+            }
+        }
+        
+        function createAlarmSound() {
+            alarmSound = new Audio('alarm.mp3');
+            alarmSound.loop = false;
+            alarmSound.volume = 0.7;
+            
+            alarmSound.addEventListener('ended', function() {
+                console.log('Alarma terminada, iniciando transición...');
+                playMusicAndTransition();
+            });
+            
+            alarmSound.play().catch(error => {
+                console.log('Error reproduciendo audio:', error);
+                // Si falla, ir directo a transición después de 3 segundos
+                setTimeout(() => {
+                    playMusicAndTransition();
+                }, 3000);
+            });
+        }
+        
+        function playMusicAndTransition() {
+            const musicSound = new Audio('musica.mp3');
+            musicSound.volume = 0.7;
+            musicSound.play().catch(error => {
+                console.log('Error reproduciendo música:', error);
+            });
+            
+            // Iniciar transición inmediatamente
+            setTimeout(() => {
+                startTransition();
+            }, 500);
+        }
+        
+        function startTransition() {
+            console.log('Iniciando transición...');
+            
+            // Detener efectos de alarma
+            alarmActive = false;
+            document.getElementById('mainContent').classList.remove('alarm-active');
+            document.getElementById('alarmButton').classList.remove('active');
+            
+            // Crear efecto fracturar
+            createFragmentedTransition();
+        }
+        
+        function createFragmentedTransition() {
+            const body = document.body;
+            const gridSize = 15;
+            
+            const transitionContainer = document.createElement('div');
+            transitionContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;pointer-events:none;';
+            body.appendChild(transitionContainer);
+            
+            // Crear fragmentos
+            for (let row = 0; row < gridSize; row++) {
+                for (let col = 0; col < gridSize; col++) {
+                    const fragment = document.createElement('div');
+                    const centerX = gridSize / 2;
+                    const centerY = gridSize / 2;
+                    const distanceX = (col - centerX) * 50;
+                    const distanceY = (row - centerY) * 50;
+                    const rotation = Math.random() * 360;
+                    
+                    fragment.style.cssText = `
+                        position:absolute;
+                        width:${100/gridSize}%;
+                        height:${100/gridSize}%;
+                        left:${(col * 100)/gridSize}%;
+                        top:${(row * 100)/gridSize}%;
+                        background-image:url('playa-tropical.png');
+                        background-size:${gridSize * 100}% ${gridSize * 100}%;
+                        background-position:-${col * 100}% -${row * 100}%;
+                        opacity:0;
+                        transform:translate(${distanceX}px, ${distanceY}px) rotate(${rotation}deg) scale(0.3);
+                        transition:all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                    `;
+                    
+                    transitionContainer.appendChild(fragment);
+                    
+                    // Animar fragmento
+                    const delay = Math.random() * 750;
+                    setTimeout(() => {
+                        fragment.style.opacity = '1';
+                        fragment.style.transform = 'translate(0px, 0px) rotate(0deg) scale(1)';
+                    }, delay);
+                }
+            }
+            
+            // Después de la transición, cambiar a segunda página
+            setTimeout(() => {
+                showSecondPage();
+            }, 1200);
+        }
+        
+        function showSecondPage() {
+            console.log('Mostrando segunda página...');
+            
+            // Cambiar fondo y limpiar
+            document.body.style.cssText = 'margin:0;font-family:Arial,sans-serif;background-image:url("playa-tropical.png");background-size:cover;background-position:center;background-repeat:no-repeat;overflow-x:hidden;';
+            document.body.innerHTML = '';
+            
+            // Crear 1.png que cae
+            const fallingImage = document.createElement('img');
+            fallingImage.src = '1.png';
+            fallingImage.style.cssText = `
+                position: fixed;
+                top: -400px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 800px;
+                height: auto;
+                z-index: 1000;
+                transition: all 0.3s ease-out;
+            `;
+            document.body.appendChild(fallingImage);
+            
+            // Animar caída - que llegue exactamente al borde inferior
+            setTimeout(() => {
+                fallingImage.style.top = 'calc(100% - 0px)';
+                fallingImage.style.transform = 'translateX(-50%) translateY(-100%)';
+            }, 100);
+            
+            // Crear TQM sin espacios - MUCHO MÁS ARRIBA
+            setTimeout(() => {
+                const tqmContainer = document.createElement('div');
+                tqmContainer.style.cssText = `
+                    position: fixed;
+                    top: calc(20% - 50px);
+                    left: 50%;
+                    transform: translateX(-50%);
+                    display: flex;
+                    gap: 0px;
+                    z-index: 1001;
+                    opacity: 0;
+                    transition: opacity 0.5s ease;
+                `;
+                
+                const gifs = ['t.gif', 'q.gif', 'm.gif'];
+                gifs.forEach(gifName => {
+                    const gifImg = document.createElement('img');
+                    gifImg.src = gifName;
+                    gifImg.style.cssText = 'width: 252px; height: auto; display: block;';
+                    tqmContainer.appendChild(gifImg);
+                });
+                
+                document.body.appendChild(tqmContainer);
+                
+                // Hacer visible
+                setTimeout(() => {
+                    tqmContainer.style.opacity = '1';
+                }, 50);
+            }, 400);
+            
+            // Crear 2.gif laterales GIGANTES - ajustados a la nueva posición de 1.png
+            setTimeout(() => {
+                // 2.gif izquierdo
+                const leftGif = document.createElement('img');
+                leftGif.src = '2.gif';
+                leftGif.style.cssText = `
+                    position: fixed;
+                    left: calc(50% - 700px);
+                    bottom: 0px;
+                    width: 400px;
+                    height: auto;
+                    z-index: 1002;
+                    opacity: 0;
+                    transform: scale(0.5);
+                    transition: all 0.5s ease;
+                `;
+                document.body.appendChild(leftGif);
+                
+                // 2.gif derecho
+                const rightGif = document.createElement('img');
+                rightGif.src = '2.gif';
+                rightGif.style.cssText = `
+                    position: fixed;
+                    right: calc(50% - 700px);
+                    bottom: 0px;
+                    width: 400px;
+                    height: auto;
+                    z-index: 1002;
+                    opacity: 0;
+                    transform: scale(0.5);
+                    transition: all 0.5s ease;
+                `;
+                document.body.appendChild(rightGif);
+                
+                // Animar aparición
+                setTimeout(() => {
+                    leftGif.style.opacity = '1';
+                    leftGif.style.transform = 'scale(1)';
+                    rightGif.style.opacity = '1';
+                    rightGif.style.transform = 'scale(1)';
+                }, 100);
+            }, 800);
+        }
+    </script>
+</body>
+</html>
